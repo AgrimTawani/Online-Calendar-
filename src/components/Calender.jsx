@@ -24,19 +24,20 @@ const Calendar = () => {
   useEffect(() => {
     axios.get('https://mocki.io/v1/7b47d683-984a-4fe8-9d40-4fc57a71145a')
       .then(res => {
+        const augustEvents = {};
         const augustHolidays = res.data.response.holidays
         augustHolidays.forEach(holiday => {
             if (holiday.date.iso.startsWith('2019-08')) {
               const day = parseInt(holiday.date.iso.split('-')[2], 10);
 
-              if (!augustHolidays[day]) {
-                augustHolidays[day] = [];
+              if (!augustEvents[day]) {
+                augustEvents[day] = [];
               }
-              augustHolidays[day].push(holiday.name);
+              augustEvents[day].push(holiday.name);
             }
           });
 
-        setEvents(augustHolidays);
+        setEvents(augustEvents);
       })
       .catch(error => {
         console.error('Error:', error);
@@ -89,7 +90,7 @@ const Calendar = () => {
           {day}
         </span>
         <div className="mt-2">
-          {events[day] && events[day].map((event, index) => (
+          {events[day]?.map((event, index) => (
             <div key={index} className="text-xs bg-blue-100 mt-1 p-1 rounded">
               {event}
             </div>
@@ -100,7 +101,7 @@ const Calendar = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-100 h-screen">
+    <div className="mx-auto p-4 bg-gray-100 h-screen">
       <h2 className="text-2xl font-bold mb-4 text-center">2019 August Calendar</h2>
       <div className="grid grid-cols-7 gap-2">
         {days.map((day) => (
