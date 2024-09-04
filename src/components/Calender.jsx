@@ -21,25 +21,28 @@ const Calendar = () => {
 
   useEffect(() => {
     axios.get('https://mocki.io/v1/7b47d683-984a-4fe8-9d40-4fc57a71145a')
-      .then(response => {
-        const holidaysData = response.data;
-        const augustHolidays = holidaysData.response.holidays
-          .filter(holiday => holiday.date.iso.startsWith('2019-08'))
-          .reduce((acc, holiday) => {
-            const day = parseInt(holiday.date.iso.split('-')[2], 10);
-            if (!acc[day]) {
-              acc[day] = [];
-            }
-            acc[day].push(holiday.name);
-            return acc;
-          }, {});
+      .then(res => {
+        const holidays = res.data.response.holidays;
+        const augustHolidays = {};
 
-        setEvents(augustHolidays);
+        holidays.forEach(holiday => {
+          if (holiday.date.iso.startsWith('2019-08')) {
+            const day = parseInt(holiday.date.iso.split('-')[2], 10);
+
+            if (!augustHolidays[day]) {
+              augustHolidays[day] = [];
+            }
+            augustHolidays[day].push(holiday.name);
+          }
+        });
+        
+        setEvents(augustHolidays); 
       })
       .catch(error => {
-        console.error('Error fetching holidays data:', error);
+        console.log(error);
       });
   }, []);
+
 
 
   const handleDayClick = (day) => {
@@ -61,7 +64,6 @@ const Calendar = () => {
         if (!updatedEvents[selectedDay]) {
           updatedEvents[selectedDay] = [];
         }
-
         updatedEvents[selectedDay] = [...updatedEvents[selectedDay], eventName];
         localStorage.setItem('events', JSON.stringify(updatedEvents));
         return updatedEvents;
@@ -99,7 +101,7 @@ const Calendar = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-100 h-screen">
+    <div className="mx-auto p-4 bg-gray-100 h-screen">
       <h2 className="text-2xl font-bold mb-4 text-center">2019 August Calendar</h2>
       <div className="grid grid-cols-7 gap-2">
         {days.map((day) => (
