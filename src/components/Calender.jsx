@@ -16,10 +16,11 @@ const Calendar = () => {
     setEvents(storedEvents);
   }, []);
 
-  useEffect(() => {
-    console.log('Saving to localStorage:', events);
-    localStorage.setItem('events', JSON.stringify(events));
-  }, [events]);
+  // useEffect(() => {
+  //   console.log('Saving to localStorage:', events);
+  //   if (localStorage == null)
+  //   localStorage.setItem('events', JSON.stringify(events));
+  // }, [events]);
 
   useEffect(() => {
     axios.get('https://mocki.io/v1/7b47d683-984a-4fe8-9d40-4fc57a71145a')
@@ -69,8 +70,9 @@ const Calendar = () => {
         return updatedEvents;
       });
       setEventName('');
+      localStorage.setItem('events', JSON.stringify(events));
       setIsModalOpen(false);
-    }
+    }    
   };
 
   const dayElements = [];
