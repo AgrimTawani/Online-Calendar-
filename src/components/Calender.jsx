@@ -1,15 +1,17 @@
-/* eslint-disable react/prop-types */
 import { X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Header from './Header';
+import Sidebar from './Sidebar';
 import axios from 'axios';
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date(2019, 0, 1));
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [eventName, setEventName] = useState('');
   const [events, setEvents] = useState({});
+  const [tasks, setTasks] = useState({});
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   useEffect(() => {
@@ -47,15 +49,30 @@ const Calendar = () => {
     localStorage.setItem('events', JSON.stringify(events));
   }, [events]);
 
+  useEffect(() => {
+    const storedTasks = JSON.parse(localStorage.getItem('tasks') || '{}');
+    setTasks(storedTasks);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
   const handleDayClick = (day) => {
     setSelectedDay(day);
     setEventName('');
     setIsModalOpen(true);
+    setIsSidebarOpen(true);
   };
 
   const handleClose = () => {
     setIsModalOpen(false);
     setEventName('');
+  };
+
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false);
+    setSelectedDay(null);
   };
 
   const handleSave = () => {
@@ -84,6 +101,34 @@ const Calendar = () => {
         delete updatedEvents[dateKey];
       }
       return updatedEvents;
+    });
+  };
+
+  const handleAddTask = (dateKey, taskText) => {
+    setTasks((prevTasks) => ({
+      ...prevTasks,
+      [dateKey]: [...(prevTasks[dateKey] || []), { text: taskText, completed: false }]
+    }));
+  };
+
+  const handleDeleteTask = (dateKey, taskIndex) => {
+    setTasks((prevTasks) => {
+      const updatedTasks = { ...prevTasks };
+      updatedTasks[dateKey] = updatedTasks[dateKey].filter((_, index) => index !== taskIndex);
+      if (updatedTasks[dateKey].length === 0) {
+        delete updatedTasks[dateKey];
+      }
+      return updatedTasks;
+    });
+  };
+
+  const handleToggleTask = (dateKey, taskIndex) => {
+    setTasks((prevTasks) => {
+      const updatedTasks = { ...prevTasks };
+      updatedTasks[dateKey] = updatedTasks[dateKey].map((task, index) => 
+        index === taskIndex ? { ...task, completed: !task.completed } : task
+      );
+      return updatedTasks;
     });
   };
 
@@ -155,7 +200,18 @@ const Calendar = () => {
 
   return (
     <div className="mx-auto p-8 bg-[#1C1F2E] min-h-screen flex items-center justify-center">
-      <div className="max-w-6xl w-full mx-auto bg-white/10 backdrop-blur-md rounded-xl shadow-lg p-8 border border-white/20">
+      <Sidebar 
+        isOpen={isSidebarOpen}
+        selectedDay={selectedDay}
+        currentDate={currentDate}
+        tasks={tasks}
+        onClose={handleCloseSidebar}
+        onAddTask={handleAddTask}
+        onDeleteTask={handleDeleteTask}
+        onToggleTask={handleToggleTask}
+      />
+      
+      <div className={`max-w-6xl w-full mx-auto bg-white/10 backdrop-blur-md rounded-xl shadow-lg p-8 border border-white/20 transition-all duration-300 ${isSidebarOpen ? 'ml-80' : ''}`}>
         <Header 
           currentDate={currentDate}
           onPrevMonth={handlePrevMonth}
@@ -172,12 +228,8 @@ const Calendar = () => {
       </div>
 
       {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300"
-        >
-          <div
-            className="bg-white/40 backdrop-blur-md p-8 rounded-lg shadow-xl transform transition-all duration-300 ease-out border border-white/20"
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
+          <div className="bg-white/40 backdrop-blur-md p-8 rounded-lg shadow-xl transform transition-all duration-300 ease-out border border-white/20">
             <h3 className="text-3xl font-bold mb-4 text-indigo-700">Add Event for Day {selectedDay}</h3>
             <div className="flex flex-col justify-center">
               <input
