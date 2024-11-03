@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Header from './Header';
@@ -12,6 +13,7 @@ const Calendar = () => {
   const [eventName, setEventName] = useState('');
   const [events, setEvents] = useState({});
   const [tasks, setTasks] = useState({});
+  const [feedbackMessage, setFeedbackMessage] = useState('');
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   useEffect(() => {
@@ -90,6 +92,8 @@ const Calendar = () => {
       });
       setEventName('');
       setIsModalOpen(false);
+      setFeedbackMessage('Event saved successfully!'); // Set feedback message
+      setTimeout(() => setFeedbackMessage(''), 3000); // Clear after 3 seconds
     }    
   };
 
@@ -124,13 +128,19 @@ const Calendar = () => {
 
   const handleToggleTask = (dateKey, taskIndex) => {
     setTasks((prevTasks) => {
-      const updatedTasks = { ...prevTasks };
-      updatedTasks[dateKey] = updatedTasks[dateKey].map((task, index) => 
-        index === taskIndex ? { ...task, completed: !task.completed } : task
-      );
-      return updatedTasks;
+        const updatedTasks = { ...prevTasks };
+        // Ensure the dateKey exists in the updatedTasks
+        if (!updatedTasks[dateKey]) {
+            updatedTasks[dateKey] = []; // Initialize it if not present
+        }
+        updatedTasks[dateKey] = updatedTasks[dateKey].map((task, index) => 
+            index === taskIndex ? { ...task, completed: !task.completed } : task
+        );
+        return updatedTasks;
     });
-  };
+};
+
+
 
   const getDaysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -217,6 +227,7 @@ const Calendar = () => {
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
         />
+        
         <div className="grid grid-cols-7 gap-4 mt-8">
           {days.map((day) => (
             <div key={day} className="font-bold font-inter text-2xl text-center p-2 text-[#D1D5DB]">
@@ -225,40 +236,61 @@ const Calendar = () => {
           ))}
           {renderCalendar()}
         </div>
+        
+        {/* Tasks for the selected day */}
+        <div className="mt-8">
+          <h2 className="text-lg font-bold mb-2">Tasks for {selectedDay}</h2>
+          <div className="bg-white rounded-lg p-4">
+            {(tasks[selectedDay] || []).map((task, index) => (
+              <div key={index} className="flex justify-between items-center border-b py-2">
+                <span className={`flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
+                  {task.name}
+                </span>
+                <button 
+                  onClick={() => onToggleTask(selectedDay, index)} 
+                  className={`text-sm ${task.completed ? 'text-red-500' : 'text-green-500'}`}
+                >
+                  {task.completed ? 'Undo' : 'Complete'}
+                </button>
+                <button 
+                  onClick={() => onDeleteTask(selectedDay, index)} 
+                  className="text-red-500 text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
-          <div className="bg-white/40 backdrop-blur-md p-8 rounded-lg shadow-xl transform transition-all duration-300 ease-out border border-white/20">
-            <h3 className="text-3xl font-bold mb-4 text-indigo-700">Add Event for Day {selectedDay}</h3>
-            <div className="flex flex-col justify-center">
-              <input
-                type="text"
-                value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                placeholder="Event Name"
-                className="border border-gray-300 p-3 mb-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white/30 backdrop-blur-md"
-              />
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={handleClose}
-                  className="px-4 py-2 rounded-lg bg-gray-200/30 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 transition-colors duration-200"
-                >
-                  Save Event
-                </button>
-              </div>
+          <div className="bg-white rounded-lg p-4 w-96">
+            <h2 className="text-xl mb-2">Add Event</h2>
+            <input
+              type="text"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              className="border border-gray-300 rounded-lg w-full p-2 mb-2"
+              placeholder="Event Name"
+            />
+            <div className="flex justify-between">
+              <button onClick={handleClose} className="bg-gray-300 rounded-lg px-4 py-2">Cancel</button>
+              <button onClick={handleSave} className="bg-blue-500 text-white rounded-lg px-4 py-2">Save</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {feedbackMessage && (
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          {feedbackMessage}
         </div>
       )}
     </div>
   );
 };
+
 
 export default Calendar;
