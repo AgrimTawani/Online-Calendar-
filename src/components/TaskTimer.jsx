@@ -1,13 +1,15 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowUp, ArrowDown } from 'lucide-react'; 
+import { ArrowUp, ArrowDown, Home } from 'lucide-react'; // Import the Home icon
 
 const TaskTimer = () => {
   const { taskName } = useParams();
   const [time, setTime] = useState(0); 
   const [timer, setTimer] = useState(0); 
   const [isRunning, setIsRunning] = useState(false);
+  const navigate = useNavigate(); // Hook to navigate between routes
 
+  // checking if the timer has started and triggering the function isRunning to show countdown
   useEffect(() => {
     if (isRunning && timer > 0) {
       const countdown = setInterval(() => {
@@ -34,23 +36,7 @@ const TaskTimer = () => {
       <div className="bg-white/20 border border-white/10 p-8 rounded-lg backdrop-blur-md text-center w-full max-w-md">
         <h2 className="text-3xl font-bold mb-4">Task: {taskName}</h2>
 
-        {!isRunning ? (
-          <div className="mb-6">
-            <input
-              type="number"
-              value={time}
-              onChange={(e) => setTime(parseInt(e.target.value, 10))}
-              placeholder="Set timer (seconds)"
-              className="p-2 rounded-lg text-gray-900 w-full text-center"
-            />
-            <button
-              onClick={startTimer}
-              className="mt-4 p-2 bg-indigo-500 text-white rounded-lg w-full hover:bg-indigo-600 transition-colors duration-200"
-            >
-              Start Timer
-            </button>
-          </div>
-        ) : (
+        {isRunning ? (
           <div className="mb-6">
             <p className="text-5xl mb-4">{timer}s</p>
             <div className="flex justify-center gap-4">
@@ -68,7 +54,30 @@ const TaskTimer = () => {
               </button>
             </div>
           </div>
+        ) : (
+          <div className="mb-6">
+            <input
+              type="number"
+              value={time}
+              onChange={(e) => setTime(parseInt(e.target.value, 10))}
+              placeholder="Set timer (seconds)"
+              className="p-2 rounded-lg text-gray-900 w-full text-center"
+            />
+            <button
+              onClick={startTimer}
+              className="mt-4 p-2 bg-indigo-500 text-white rounded-lg w-full hover:bg-indigo-600 transition-colors duration-200"
+            >
+              Start Timer
+            </button>
+          </div>
         )}
+
+        <button
+          onClick={() => navigate('/')}
+          className=" absolute ml-[150%] -mt-[90%] p-4 bg-blue-500 text-white rounded-2xl w-fit hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center"
+        >
+          <Home size={24}/>
+        </button>
       </div>
     </div>
   );

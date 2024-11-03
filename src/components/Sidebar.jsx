@@ -38,8 +38,7 @@ const Sidebar = ({
     >
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl font-bold text-white">
-          Tasks for {selectedDay}{' '}
-          {currentDate.toLocaleString('default', { month: 'long' })}
+          Tasks for {selectedDay}{' '}{currentDate.toLocaleString('default', { month: 'long' })}
         </h3>
         <button
           onClick={onClose}
