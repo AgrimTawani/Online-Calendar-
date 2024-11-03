@@ -13,7 +13,6 @@ const Calendar = () => {
   const [eventName, setEventName] = useState('');
   const [events, setEvents] = useState({});
   const [tasks, setTasks] = useState({});
-  const [feedbackMessage, setFeedbackMessage] = useState('');
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   useEffect(() => {
@@ -92,8 +91,6 @@ const Calendar = () => {
       });
       setEventName('');
       setIsModalOpen(false);
-      setFeedbackMessage('Event saved successfully!'); // Set feedback message
-      setTimeout(() => setFeedbackMessage(''), 3000); // Clear after 3 seconds
     }    
   };
 
@@ -129,9 +126,8 @@ const Calendar = () => {
   const handleToggleTask = (dateKey, taskIndex) => {
     setTasks((prevTasks) => {
         const updatedTasks = { ...prevTasks };
-        // Ensure the dateKey exists in the updatedTasks
         if (!updatedTasks[dateKey]) {
-            updatedTasks[dateKey] = []; // Initialize it if not present
+            updatedTasks[dateKey] = [];
         }
         updatedTasks[dateKey] = updatedTasks[dateKey].map((task, index) => 
             index === taskIndex ? { ...task, completed: !task.completed } : task
@@ -139,8 +135,6 @@ const Calendar = () => {
         return updatedTasks;
     });
 };
-
-
 
   const getDaysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -237,60 +231,38 @@ const Calendar = () => {
           {renderCalendar()}
         </div>
         
-        {/* Tasks for the selected day */}
-        <div className="mt-8">
-          <h2 className="text-lg font-bold mb-2">Tasks for {selectedDay}</h2>
-          <div className="bg-white rounded-lg p-4">
-            {(tasks[selectedDay] || []).map((task, index) => (
-              <div key={index} className="flex justify-between items-center border-b py-2">
-                <span className={`flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
-                  {task.name}
-                </span>
-                <button 
-                  onClick={() => onToggleTask(selectedDay, index)} 
-                  className={`text-sm ${task.completed ? 'text-red-500' : 'text-green-500'}`}
-                >
-                  {task.completed ? 'Undo' : 'Complete'}
-                </button>
-                <button 
-                  onClick={() => onDeleteTask(selectedDay, index)} 
-                  className="text-red-500 text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
-          <div className="bg-white rounded-lg p-4 w-96">
-            <h2 className="text-xl mb-2">Add Event</h2>
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 w-80">
+            <h3 className="text-lg font-bold">Add Event</h3>
             <input
               type="text"
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
-              className="border border-gray-300 rounded-lg w-full p-2 mb-2"
-              placeholder="Event Name"
+              className="border border-gray-300 rounded-lg p-2 w-full mt-2"
+              placeholder="Event name"
             />
-            <div className="flex justify-between">
-              <button onClick={handleClose} className="bg-gray-300 rounded-lg px-4 py-2">Cancel</button>
-              <button onClick={handleSave} className="bg-blue-500 text-white rounded-lg px-4 py-2">Save</button>
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={handleClose}
+                className="bg-red-500 text-white rounded-lg px-4 py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="bg-green-500 text-white rounded-lg px-4 py-2"
+              >
+                Save
+              </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {feedbackMessage && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
-          {feedbackMessage}
         </div>
       )}
     </div>
   );
 };
-
 
 export default Calendar;
